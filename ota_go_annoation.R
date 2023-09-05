@@ -195,6 +195,10 @@ head(ostta.pathway.go.annotation)
 ostta.complete.annotation <- rbind(ostta.manual.annotation,ostta.pathway.go.annotation)
 nrow(ostta.complete.annotation)
 
+
+ostta.complete.annotation <- read.table(file="ostta_v5_go_annotation.tsv",header=T,sep="\t")
+
+
 length(unique(ostta.complete.annotation$GID))/7668 # improvement in the annotation
 
 ## We sort the unified annoation according to the gene names
@@ -211,10 +215,12 @@ ostta.complete.annotation <- ostta.complete.annotation[!duplicated(ostta.complet
 BiocManager::install("AnnotationForge")
 library(AnnotationForge)
 
+BiocManager::install("GO.db")
+
 makeOrgPackage(go=ostta.complete.annotation,
                version = "2.1",
                maintainer = "Francisco J. Romero-Campero <fran@us.es>",
-               author = "Pedro J. Vega-Asecio",
+               author = "Pedro J. Vega-Asencio",
                outputDir = ".", 
                tax_id = "70448",
                genus = "Ostreococcus",

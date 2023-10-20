@@ -1,9 +1,9 @@
 ## Load current GO annoation for Ostreococcus tauri
-ostta_v3_go_annotation <- read.table(file="ostta_v3_go_annotation.tsv", header=T, sep="\t")
+ostta_v1_go_annotation <- read.table(file="./annotation/ostta_v1_go_annotation.tsv", header=T, sep="\t")
 
-head(ostta_v3_go_annotation)
-length(unique(ostta_v3_go_annotation$GID))
-length(unique(ostta_v3_go_annotation$GID))/7668
+head(ostta_v1_go_annotation)
+length(unique(ostta_v1_go_annotation$GID))
+length(unique(ostta_v1_go_annotation$GID))/7668
 
 ## Only 4060 genes, 52.9% of the genome is currently annotated
 ## our goal is to improve this annotation included 
@@ -11,41 +11,45 @@ length(unique(ostta_v3_go_annotation$GID))/7668
 ## annotation inferred from KEGG pathways
 ################################################################################
 
-# Creation of v4
+# Creation of v1.2
 # Read the TSV file
 # Read the CSV file with semicolon (;) as the delimiter
-#ostta_v3_go_annotation <- read.table("ostta_v3_go_annotation.tsv", sep = "\t", header = TRUE)
-gene_expansion <- read.csv("gene_expansion.csv", sep = ";", header = FALSE)
+#ostta_v1_go_annotation <- read.table("./annotation/ostta_v1_go_annotation.tsv", sep = "\t", header = TRUE)
+gene_expansion <- read.csv("./manual_expansion/gene_expansion.csv", sep = ";", header = FALSE)
 
 # To combine both dataframes using rbind, they need to have the same format (same column names)
-colnames(gene_expansion) <- colnames(ostta_v3_go_annotation)
-ostta_v4_go_annotation <- rbind(ostta_v3_go_annotation, gene_expansion)
+colnames(gene_expansion) <- colnames(ostta_v1_go_annotation)
+ostta_v1.2_go_annotation <- rbind(ostta_v1_go_annotation, gene_expansion)
 
 # Get the order of rows based on the first column; first, we need to create the vector
-order <- order(ostta_v4_go_annotation[, 1])
+order <- order(ostta_v1.2_go_annotation[, 1])
 # Reorder the rows of the dataframe according to the order vector
-ostta_v4_go_annotation <- ostta_v4_go_annotation[order, ]
+ostta_v1.2_go_annotation <- ostta_v1.2_go_annotation[order, ]
 
   # Observe
   # Identify duplicate rows in columns 1 and 2 (genes and GO)
-  duplicate_rows <- duplicated(ostta_v4_go_annotation[, c(1, 2)]) | duplicated(ostta_v4_go_annotation[, c(1, 2)], fromLast = TRUE)
+  duplicate_rows <- duplicated(ostta_v1.2_go_annotation[, c(1, 2)]) | duplicated(ostta_v1.2_go_annotation[, c(1, 2)], fromLast = TRUE)
   # Select only the duplicate rows
-  duplicate_data <- ostta_v4_go_annotation[duplicate_rows, ]
+  duplicate_data <- ostta_v1.2_go_annotation[duplicate_rows, ]
   # View the result
   print(duplicate_data)
   
   # Remove
   # Remove duplicate rows in columns 1 and 2 (genes and GO), leaving one copy
-  ostta_v4_go_annotation <- unique(ostta_v4_go_annotation[, c(1, 2, 3)])
+  ostta_v1.2_go_annotation <- unique(ostta_v1.2_go_annotation[, c(1, 2, 3)])
   # Print the result
-  print(ostta_v4_go_annotation)
+  print(ostta_v1.2_go_annotation)
   
-  # Save the ostta_v4_go_annotation dataframe to a TSV file without quotes
-  write.table(ostta_v4_go_annotation, "ostta_v4_go_annotation.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+  # Save the ostta_v1.2_go_annotation dataframe to a TSV file without quotes
+  write.table(ostta_v1.2_go_annotation, "./manual_expansion/ostta_v1.2_go_annotation.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
 
 
 ################################################################################
 ## Load library to connect to KEGG annotation
+# if (!require("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# 
+# BiocManager::install("KEGGREST")
 library(KEGGREST)
 
 ## Get all supported organisms
@@ -53,7 +57,7 @@ org <- keggList("organism")
 org
 
 ## Write file to look for Ostreococcus tauri identifier
-write.table(org,file = "organisms_in_kegg.txt")
+write.table(org,file = "./kegg_expansion/organisms_in_kegg.txt")
 
 ## Once we have found the identifier for Ostreococcus tauri
 ## we check the information available
@@ -135,13 +139,13 @@ for(i in 1:nrow(pathways.df))
 
 head(pathways.df)
 
-write.table(x = pathways.df,file = "pathways_ostreococcus_tauri.tsv",quote = F,sep = "\t",row.names = FALSE)
+write.table(x = pathways.df,file = "./kegg_expansion/pathways_ostreococcus_tauri.tsv",quote = F,sep = "\t",row.names = FALSE)
 
 ## Now you have to manually associated a GO term to each pathway using 
 ## for example the web page: http://geneontology.org/ searching only for ontology
 
 ## Next we load the pathways in Ostreococcus tauri annotated with GOs
-ostta.pathways.go <- read.table(file="pathways_ostreococcus_tauri_go_added.tsv",header=T, sep="\t")
+ostta.pathways.go <- read.table(file="./kegg_expansion/pathways_ostreococcus_tauri_go_added.tsv",header=T, sep="\t")
 head(ostta.pathways.go)
 
 ## We keep only pathways annotated with a GO
@@ -211,83 +215,85 @@ for(i in 1:nrow(ostta.pathways.with.go))
 ostta.pathway.go.gid.go.evidence <- subset(ostta.pathway.go.gid.go.evidence, !is.na(GID))
 
 ## We write the result of this annotation to a file
-write.table(x = ostta.pathway.go.gid.go.evidence, file = "ostta_go_annotation_from_kegg_pathways.tsv",quote = F,sep = "\t",row.names = F)
+write.table(x = ostta.pathway.go.gid.go.evidence, file = "./kegg_expansion/ostta_go_annotation_from_kegg_pathways.tsv",quote = F,sep = "\t",row.names = F)
+
+
 ################################################################################
 
-# Creation of v5
+# Creation of v2
 # Read the TSV file
-ostta_v4_go_annotation <- read.table("ostta_v4_go_annotation.tsv", sep = "\t", header = TRUE)
-ostta_go_annotation_from_kegg_pathways <- read.table("ostta_go_annotation_from_kegg_pathways.tsv", sep = "\t", header = TRUE)
+ostta_v1.2_go_annotation <- read.table("./manual_expansion/ostta_v1.2_go_annotation.tsv", sep = "\t", header = TRUE)
+ostta_go_annotation_from_kegg_pathways <- read.table("./kegg_expansion/ostta_go_annotation_from_kegg_pathways.tsv", sep = "\t", header = TRUE)
 
 # Merge
-ostta_v5_go_annotation <- rbind(ostta_go_annotation_from_kegg_pathways, ostta_v4_go_annotation)
+ostta_v2_go_annotation <- rbind(ostta_go_annotation_from_kegg_pathways, ostta_v1.2_go_annotation)
 
 # Get the order of rows based on the first column; first, we need to create the vector
-order <- order(ostta_v5_go_annotation[, 1])
+order <- order(ostta_v2_go_annotation[, 1])
 # Reorder the rows of the dataframe according to the order vector 
-ostta_v5_go_annotation <- ostta_v5_go_annotation[order, ]
+ostta_v2_go_annotation <- ostta_v2_go_annotation[order, ]
 
-# Observe
-# Identify duplicate rows in columns 1 and 2 (genes and GO)
-duplicate_rows <- duplicated(ostta_v5_go_annotation[, c(1, 2)]) | duplicated(ostta_v5_go_annotation[, c(1, 2)], fromLast = TRUE)
-# Select only the duplicate rows
-duplicate_data <- ostta_v5_go_annotation[duplicate_rows, ]
-# View the result
-print(duplicate_data)
+  # Observe
+  # Identify duplicate rows in columns 1 and 2 (genes and GO)
+  duplicate_rows <- duplicated(ostta_v2_go_annotation[, c(1, 2)]) | duplicated(ostta_v2_go_annotation[, c(1, 2)], fromLast = TRUE)
+  # Select only the duplicate rows
+  duplicate_data <- ostta_v2_go_annotation[duplicate_rows, ]
+  # View the result
+  print(duplicate_data)
+  
+  # Remove
+  # Remove duplicate rows in columns 1 and 2 (genes and GO), leaving one copy
+  ostta_v2_go_annotation <- unique(ostta_v2_go_annotation[, c(1, 2, 3)])
+  # Print the result (optional)
+  print(ostta_v2_go_annotation)
+  
+  # Save the ostta_v2_go_annotation dataframe to a TSV file without quotes
+  write.table(ostta_v2_go_annotation, "./annotation/ostta_v2_go_annotation.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
 
-# Remove
-# Remove duplicate rows in columns 1 and 2 (genes and GO), leaving one copy
-ostta_v5_go_annotation <- unique(ostta_v5_go_annotation[, c(1, 2, 3)])
-# Print the result (optional)
-print(ostta_v5_go_annotation)
+# Is there any improvement ostta_v2_go_annotation compared to version 1?
+ostta.annoation.v2 <- read.table(file="./annotation/ostta_v2_go_annotation.tsv",header=T,sep="\t")
 
-# Save the ostta_v5_go_annotation dataframe to a TSV file without quotes
-write.table(ostta_v5_go_annotation, "ostta_v5_go_annotation.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+head(ostta.annoation.v2)
+length(unique(ostta.annoation.v2$GID))
+length(unique(ostta.annoation.v2$GID))/7668 #we see that the annotation has improved around 4%
 
-
-
+  # ## Alternative way:
   # ## Now we generate an annotation R package with the updated annotations
-  # ostta.manual.annotation <- read.table(file="ostta_v4_go_annotation.tsv",header=T,sep="\t")
+  # ostta.manual.annotation <- read.table(file="./manual_expansion/ostta_v1.2_go_annotation.tsv",header=T,sep="\t")
   # head(ostta.manual.annotation)
-  # ostta.pathway.go.annotation <- read.table(file="ostta_go_annotation_from_kegg_pathways.tsv",header=T,sep="\t")
+  # ostta.pathway.go.annotation <- read.table(file="./kegg_expansion/ostta_go_annotation_from_kegg_pathways.tsv",header=T,sep="\t")
   # head(ostta.pathway.go.annotation)
   # 
   # ## We paste together the two annotations
-  # ostta.complete.annotation <- rbind(ostta.manual.annotation,ostta.pathway.go.annotation)
-  # nrow(ostta.complete.annotation)
+  # ostta.annoation.v2 <- rbind(ostta.manual.annotation,ostta.pathway.go.annotation)
+  # nrow(ostta.annoation.v2)
   # 
   # ## We sort the unified annoation according to the gene names
-  # genes.sorted <- sort(x = ostta.complete.annotation$GID,decreasing = F,index.return=T)
+  # genes.sorted <- sort(x = ostta.annoation.v2$GID,decreasing = F,index.return=T)
   # index.genes.sorted <- genes.sorted$ix
   # 
-  # ostta.complete.annotation <- ostta.complete.annotation[index.genes.sorted,]
+  # ostta.annoation.v2 <- ostta.annoation.v2[index.genes.sorted,]
   # 
   # ## Remove duplicate rows
-  # ostta.complete.annotation <- ostta.complete.annotation[!duplicated(ostta.complete.annotation),]
+  # ostta.annoation.v2 <- ostta.annoation.v2[!duplicated(ostta.annoation.v2),]
   # 
-  # length(unique(ostta.complete.annotation$GID))/7668 # improvement in the annotation
+  # length(unique(ostta.annoation.v2$GID))/7668 # improvement in the annotation
 
 
-# Is there any improvement ostta_v5_go_annotation compared to version 3?
-ostta.annoation.v5 <- read.table(file="ostta_v5_go_annotation.tsv",header=T,sep="\t")
-
-head(ostta.annoation)
-length(unique(ostta.annoation.v5$GID))
-length(unique(ostta.annoation.v5$GID))/7668 #we see that the annotation has improved around 4%
 
 
 ################################################################################
 
 ## We need this package to create our annotation package 
 ## Before remove the current version in the folder to avoid conflicts
-BiocManager::install("AnnotationForge")
+# BiocManager::install("AnnotationForge")
 library(AnnotationForge)
 
-BiocManager::install("GO.db")
+# BiocManager::install("GO.db")
 library(GO.db)
 
 
-makeOrgPackage(go=ostta.complete.annotation,
+makeOrgPackage(go=ostta.annoation.v2,
                version = "2.1",
                maintainer = "Francisco J. Romero-Campero <fran@us.es>",
                author = "Pedro J. Vega-Asencio",
@@ -299,169 +305,235 @@ makeOrgPackage(go=ostta.complete.annotation,
                verbose = TRUE)
 
 ## You can install the package with this command
-install.packages("./org.Otauriv2.eg.db/", repos=NULL, type = "source")
+# install.packages("./org.Otauriv2.eg.db/", repos=NULL, type = "source")
 library(org.Otauriv2.eg.db)
 
 
-install.packages("./old_otauri_package/org.Otauri.eg.db/", repos=NULL, type = "source")
+# install.packages("./old_otauri_package/org.Otauri.eg.db/", repos=NULL, type = "source")
 library(org.Otauri.eg.db)
-
-## Using clusterprofiler, this new package and the gene sets to test enrihcment
-## you can test how your annotation improves the previous one. 
-BiocManager::install("clusterProfiler")
-library(clusterProfiler)
 
 ## You can remove the package you have created and install the old one and
 ## check the changes in the annotation
-remove.packages("org.Otauri.eg.db")
+# remove.packages("org.Otauri.eg.db")
+
+################################################################################
+# # COMPARISON OF VERSIONS
+## Using clusterprofiler, this new package and the gene sets to test enrihcment
+## you can test how your annotation improves the previous one. 
+# BiocManager::install("clusterProfiler")
+library(clusterProfiler)
 
 
+# # GO IMPROVEMENT
+# install.packages("DBI")
+library(DBI) #(Data Base Interface)
+# Comparison of GO terms for each annotation
+  # Extract all GO terms from the old package org.Otauri.eg.db and determine their ontology
+  go.1 <- dbGetQuery(dbconn(org.Otauri.eg.db), "select * from go;")
+  head(go.1)
+  (count_v1 <- table(go.1$ONTOLOGY))
+  # Extract all GO terms from the new package org.Otauriv2.eg.db and determine their ontology
+  go.2 <- dbGetQuery(dbconn(org.Otauriv2.eg.db), "select * from go;")
+  head(go.2)
+  (count_v2 <- table(go.2$ONTOLOGY))
+    # Barplot
+    # install.packages("ggplot2")
+    library(ggplot2)
+    # install.packages("tidyr")
+    library(dplyr)
+    # Create a dataframe with the counts
+    df <- data.frame(Version = c("v1", "v2"),
+                     BP = c(count_v1["BP"], count_v2["BP"]),
+                     CC = c(count_v1["CC"], count_v2["CC"]),
+                     MF = c(count_v1["MF"], count_v2["MF"]))
+    # Convert the dataframe to long (tidy) format for the plot
+    library(tidyr)
+    df_long <- pivot_longer(df, cols = -Version, names_to = "Ontology", values_to = "NumberOfGO")
+    # Create the bar chart
+    library(ggplot2)
+    ggplot(df_long, 
+           aes(x = Ontology, 
+               y = NumberOfGO, 
+               fill = Version)) + geom_bar(stat = "identity", 
+                                           position = "dodge") + labs(x = "Ontology", 
+                                                                      y = "Number of GO", 
+                                                                      fill = "Version") + ggtitle("Comparison of Number of GO terms per Category and Version") + theme_minimal()
 
+# # GENE IMPROVEMENT
+# Compare the total number of genes associated with each ontology GO term (For each ontology, extract GO terms, and for each GO term, extract genes)
+  # Create an empty dataframe to store the results
+  result_categories <- data.frame(Version = character(0), Category = character(0), Genes = numeric(0))
+  
+  # Create a vector of versions
+  annotation <- c("V1", "V2")
+  
+  for (version in annotation) {
+    # Get data for the current version
+    if (version == "V1") {
+      go_data <- go.1
+      db_conn <- org.Otauri.eg.db
+    } else if (version == "V2") {
+      go_data <- go.2
+      db_conn <- org.Otauriv2.eg.db
+    }
+    
+    # Unique categories
+    categories <- sort(unique(go_data$ONTOLOGY)) # Sort the categories; another option would be to directly specify the vector as categories <- c("BP", "CC", "MF")
+    
+    for (category in categories) {
+      # Filter GO terms for the current category
+      go_category <- subset(go_data, ONTOLOGY == category)$GO
+      genes_category <- character(0)
+      
+      for (go in go_category) {
+        # Get genes for the current GO term
+        genes <- unique(AnnotationDbi::select(db_conn, keytype = "GOALL", keys = go, columns = "GID")$GID)
+        genes_category <- c(genes_category, genes)
+      }
+      
+      # Count the number of unique genes
+      num_genes_category <- length(unique(genes_category))
+      
+      # Add results to the dataframe
+      result_categories <- rbind(result_categories, data.frame(Version = version, Category = category, Genes = num_genes_category))
+    }
+  }
+  
+  # Pivot the dataframe to obtain the desired format
+  save(result_categories, file= "result_categories.RData")
+  load("./result_categories.RData")
+  library(reshape2)
+  result_categories_df <- dcast(result_categories, Version ~ Category, value.var = "Genes")
+  # Print the results dataframe
+  print(result_categories_df)
+  # Barplot of the data
+  library(ggplot2)
+  # Convert the dataframe to long (tidy) format for the plot
+  library(tidyr)
+  result_categories_long <- pivot_longer(result_categories_df, 
+                                         cols = -Version, 
+                                         names_to = "Category", 
+                                         values_to = "NumberGenes")
+  
+  # Create the bar chart
+  ggplot(result_categories_long, aes(x = Category, y = NumberGenes, fill = Version)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(x = "Category", y = "Number of Genes", fill = "Version") +
+    ggtitle("Comparison of Number of Genes per Category and Version") +
+    theme_minimal()
 
+  
+  
 
+# # Enrichment GO terms
+# BiocManager::install("enrichplot")
+library(enrichplot)
+# Define the versions
+annotation <- c("V1", "V2")
+# Create the folders
+dir.create("./results")
+dir.create("./results/revigo_v1")
+dir.create("./results/revigo_v2")
+dir.create("./results/plots_v1")
+dir.create("./results/plots_v2")
+# Loop to process each version
+for (version in annotation) {
+  # Set the database based on the version
+  if (version == "V1") {
+    db_conn <- org.Otauri.eg.db
+    revigo_folder <- "./results/revigo_v1"
+    plots_folder <- "./results/plots_v1"
+  } else if (version == "V2") {
+    db_conn <- org.Otauriv2.eg.db
+    revigo_folder <- "./results/revigo_v2"
+    plots_folder <- "./results/plots_v2"
+  }
+  
+  # This is how we perform enrichment of all gene sets automatically with a for loop
+  # Specify the path to the "gene_data" folder
+  gene_folder <- "./gene_data/"
+  
+  # List of names of gene set files
+  data_set <- c("example_otauri.tsv", 
+                "ld_zt0.tsv", "ld_zt4.tsv", "ld_zt8.tsv", "ld_zt12.tsv", "ld_zt16.tsv", "ld_zt20.tsv",
+                "sd_zt0.tsv", "sd_zt4.tsv", "sd_zt8.tsv", "sd_zt12.tsv", "sd_zt16.tsv", "sd_zt20.tsv")
+  
+  # Loop to load and analyze each gene set
+  for (set in data_set) {
+    
+    # Load the gene set
+    current_set <- read.table(file.path(gene_folder, set), header = TRUE, sep = " ")
+    
+    # Perform the enrichment analysis
+    enrichment <- enrichGO(gene = current_set$geneID, 
+                           OrgDb = db_conn,
+                           ont = "BP", 
+                           keyType = "GID")
+    
+    
+    # Print the results
+    cat("Results for:", set, "\n")
+    print(head(enrichment))
+    
+    # Create a filename for the result
+    set_name <- gsub(".tsv", "", set)
+    filename <- paste(set_name, "_GO_enrichment_", version, sep = "")
+    
+    # Save the enrichment results in a dataframe (SIGNIFICANT INFORMATION FILTER)
+    enrichment_df <- as.data.frame(enrichment)
+    write.table(enrichment_df, 
+                file = file.path(revigo_folder, paste(filename, "_df.txt", sep = "")), 
+                sep = "\t", 
+                quote = FALSE, 
+                row.names = FALSE)
+    
+    # Extract the GO terms from the result
+    GO_result <- enrichment_df$ID
+    
+    # Write the result to a text file
+    write.table(GO_result, 
+                file = file.path(revigo_folder, paste(filename, ".txt", sep = "")), 
+                quote = FALSE, 
+                sep = "\t",
+                col.names = FALSE,
+                row.names = FALSE)
+    
+    # Print a completion message for this gene set
+    cat("File", filename, "generated.\n")
+    
+    # Check if enrichment is not empty
+    if (!identical(GO_result, character(0))) { #if (nrow(enrichment_df) > 0) #if (nrow(enrichment_df) >= 1)
+      # Now we will generate the plots for each gene set using the loop
+      # Generate and save the plots with customized titles
+      # Create a base filename for the plots
 
+      # Barplot
+      pdf(file.path(plots_folder, paste(set_name, "_barplot_", version,".pdf", sep = "")))
+      plot(barplot(enrichment, showCategory = 15, title = paste("Barplot ", filename)))
+      dev.off()
+      
+      # Dotplot
+      pdf(file.path(plots_folder, paste(set_name, "_dotplot_", version,".pdf", sep = "")))
+      plot(dotplot(enrichment, showCategory = 15, title = paste("Dotplot ", filename)))
+      dev.off()
+      
+      # Emapplot
+      pdf(file.path(plots_folder, paste(set_name, "_emapplot_", version,".pdf", sep = "")))
+      plot(emapplot(pairwise_termsim(enrichment), showCategory = 15, title = paste("Emapplot ", filename))) 
+      dev.off()
+      
+      # Cnetplot
+      pdf(file.path(plots_folder, paste(set_name, "_cnetplot_", version,".pdf", sep = "")))
+      plot(cnetplot(enrichment, title = paste("Cnetplot ", filename))) 
+      dev.off()
+      
+    } else {
+      cat("No graphs generated for:", set, "as enrichment is empty.\n")
+    }
+  }
+}
 
-
-
-
+  
 
 
 ################################################################################
-#QUEDA: CORREGIR EN EL BUCLE EL ERROR QUE TENGA EL 1X1 
-#AÑADIR AL BUBLE LA CREACIÓN DE LOS DEMÁS GRÁFICOS O HACER OTRO BUCLE PARA ELLO
-
-# Enriquecimiento
-# Cargar la base de datos de anotación de Ostreococcus tauri 
-library(org.Otauri.eg.db)
-
-
-# # Así podríamos realizar el enriquecimiento de cada conjunto de genes uno por uno:
-#   # Leer el conjunto de genes
-    ld_zt0 <- read.table("./gene_data/ld_zt0.tsv", header = TRUE, sep = " ")
-    
-    # Realizar el análisis de enriquecimiento
-    enrichresult_ld_zt0 <- enrichGO(gene = ld_zt0$geneID,
-                                    OrgDb = org.Otauriv2.eg.db,
-                                    ont = "BP",
-                                    keyType = "GID") # keytypes(org.Otauri.eg.db)
-    # Ver los resultados: 2 fromas
-      #1
-      head(enrichresult_ld_zt0)
-      length(unique(enrichresult_ld_zt0@result$ID)) # debo poner @ en lugar de $
-      GO_ld_zt0=enrichresult_ld_zt0@result$ID
-      
-      #2
-      df_enrichresult_ld_zt0=as.data.frame(enrichresult_ld_zt0)
-      head(enrichresult_ld_zt0)
-      length(unique(df_enrichresult_ld_zt0$ID)) #al pasarlo a data frame se reduce mucho el numero de GO, aunque de todos sale algo menos del ld_zt20, puede que el problema esté en el keytype?
-      write.table(df_enrichresult_ld_zt0, file = "enrichresult_ld_zt0.txt", sep = "\t", quote = FALSE, row.names = FALSE)
-      GO_ld_zt0=enrichresult_ld_zt0$ID
-      
-      write.table(GO_ld_zt0, #cual cojo? el del enrich o el df?
-                  file = "GO_ld_zt0.tsv",
-                  quote = F,
-                  sep = "\t",
-                  col.names = F,
-                  row.names = F)
-
-
-# Así realizamos el enriquecimiento de todos los conjuntos de genes de forma automatizada con un bucle for
-# Especifica la ruta a la carpeta "gene_data"
-ruta_genes <- "./gene_data/"
-
-# Lista de nombres de los archivos de conjuntos de genes
-archivos_genes <- c("sd_zt20.tsv", "sd_zt16.tsv", "sd_zt12.tsv", 
-                    "sd_zt8.tsv", "sd_zt4.tsv", "sd_zt0.tsv", 
-                    "ld_zt20.tsv", "ld_zt16.tsv", "ld_zt12.tsv", 
-                    "ld_zt8.tsv", "ld_zt4.tsv", "ld_zt0.tsv")
-
-# Bucle para cargar y analizar cada conjunto de genes
-for (archivo in archivos_genes) {
-  # Construir la ruta completa al archivo
-  archivo_completo <- paste0(ruta_genes, archivo)
-  
-  # Cargar el conjunto de genes
-  conjunto_genes <- read.table(archivo_completo, header = TRUE, sep = " ")
-  
-  # Realizar el análisis de enriquecimiento
-  enrich_result <- enrichGO(gene = conjunto_genes$geneID, 
-                            OrgDb = org.Otauri.eg.db,
-                            ont = "BP", 
-                            keyType = "GID")
-  # Imprimir los resultados
-  print(paste("Resultados para:", archivo))
-  print(head(enrich_result))
-  
-  # Crear un nombre de archivo para el resultado
-  nombre_archivo <- paste("GO_", gsub(".tsv", "", archivo), ".txt", sep = "")
-  
-  # Extraer los términos de GO del resultado
-  GO_result <- as.data.frame(enrich_result$ID)
-  
-  # Escribir el resultado en un archivo de texto
-  write.table(GO_result, 
-              file = file.path("./results/revigo", nombre_archivo), 
-              quote = FALSE, 
-              sep = "\t",
-              col.names = FALSE,
-              row.names = FALSE)
-  
-  # Imprimir mensaje de finalización para este conjunto de genes
-  cat("Archivo", nombre_archivo, "generado.\n")
-}
-
-
-
-
-
-
-
-
-  # # me da problemas este
-  # ld_zt20 <- read.table("./gene_data/ld_zt20.tsv", header = TRUE, sep = " ")
-  # 
-  # # Realizar el análisis de enriquecimiento
-  # enrichresult_ld_zt20 <- enrichGO(gene = ld_zt20$geneID, 
-  #                                  OrgDb = org.Otauri.eg.db,
-  #                                  ont = "BP", 
-  #                                  keyType = "GID") # keytypes(org.Otauri.eg.db)
-  # # Ver los resultados
-  # head(enrichresult_ld_zt20)
-  # 
-  # enrichresult_ld_zt20=as.data.frame(enrichresult_ld_zt20)
-  # GO_ld_zt20=enrichresult_ld_zt20$ID
-  # 
-  # write.table(GO_ld_zt20, 
-  #             file = "GO_ld_zt20.txt", 
-  #             quote = F, 
-  #             sep = "\t",
-  #             col.names = F,
-  #             row.names = F)
-
-
-  # # otro ejemplo interesante
-  # example_otauri <- read.table("./gene_data/example_otauri.txt", header = TRUE, sep = " ")
-  # 
-  # # Realizar el análisis de enriquecimiento
-  # enrichresult_example_otauri <- enrichGO(gene = example_otauri$geneID,
-  #                                  OrgDb = org.Otauri.eg.db,
-  #                                  ont = "BP",
-  #                                  keyType = "GID") # keytypes(org.Otauri.eg.db)
-  # # Ver los resultados
-  # head(enrichresult_example_otauri)
-  # 
-  # enrichresult_example_otauri=as.data.frame(enrichresult_example_otauri)
-  # GO_example_otauri=enrichresult_example_otauri$ID
-  # 
-  # write.table(GO_example_otauri,
-  #             file = "GO_example_otauri.txt",
-  #             quote = F,
-  #             sep = "\t",
-  #             col.names = F,
-  #             row.names = F)
-
-
-
-
-
-

@@ -1,0 +1,2 @@
+ID	Description	GeneRatio	BgRatio	pvalue	p.adjust	qvalue	geneID	Count
+GO:0006108	malate metabolic process	7/314	10/2435	4.72279853666442e-05	0.0157269191270925	0.0122792761953275	ostta01g00040/ostta04g03550/ostta06g00150/ostta06g03750/ostta07g01040/ostta08g00050/ostta12g02650	7

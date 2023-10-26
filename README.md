@@ -28,3 +28,30 @@ The work conducted during the OSTIGO project is documented in this GitHub reposi
   - **tables_figures**: This folder encompasses the results obtained with two barplots showing an increase in the number per ontological category for both GO terms (Figure_1.png) and genes (Figure_2.png). It also contains multipanel figures summarizing results from previous folders for representative datasets in each Case Study I (Figure_3.png) and Case Study II (Figure_4.png). Additionally, there is a representative summary table for the manual expansion ("Table 1.docx").
   - **Supplementary**: The "Supplementary" folder contains high-quality multipanel figures and tables related to both manual and programmatic expansion processes.
 
+### Workspace summary: 
+- **annotation:**
+  - “ostta_v1_go_annotation.tsv”
+  - “ostta_v2_go_annotation.tsv”
+- **gene_data:**
+  - "example_otauri.tsv"
+  - "ld_zt0.tsv", "ld_zt4.tsv", "ld_zt8.tsv", "ld_zt12.tsv", "ld_zt16.tsv", "ld_zt20.tsv", "sd_zt0.tsv", "sd_zt4.tsv", "sd_zt8.tsv", "sd_zt12.tsv", "sd_zt16.tsv", "sd_zt20.tsv"
+- **kegg_expansion:**
+  - “pathways_ostreococcus_tauri.tsv”
+  - “ostta_go_annotation_from_kegg_pathways.tsv”
+- **manual_expansion:**
+  - “gene_expansion.csv”
+  - “ostta_v1.2_go_annotation.tsv”
+- **old_otauri_package/org.Otauri.eg.db y org.Otauriv2.eg.db**
+- **results:**
+  - plots_v1
+  - plots_v2
+  - revigo_v1
+  - revigo_v2
+- **tables_figures:**
+  - Figure_1.png
+  - Figure_2.png
+  - Figure_3.png
+  - Figure_4.png
+  - Table 1.docx
+- **Suplementary**
+

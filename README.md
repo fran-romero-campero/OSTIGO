@@ -1,3 +1,5 @@
+<p align="center">  <img src="SN.PNG" width="10%"></p>
+
 # OSTIGO
 **Ostreococcus tauri Gene Ontology Annotation Curation**
 
